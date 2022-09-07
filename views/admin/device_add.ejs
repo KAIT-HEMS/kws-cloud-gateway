@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-3">
+          <h1 class="h2 pb-2 border-bottom">
+            デバイス追加
+          </h1>
+
+          <p><a href="/admin/devicelist"><span data-feather="arrow-left-circle"></span> デバイス一覧に戻る</a></p>
+          <p>以下は発見済みのデバイスのうち未登録のデバイスを列挙しています。本クラウド Gateway
+            起動直後ではまだデバイスが発見されません。もし期待するデバイスが列挙されていない場合は、少し時間をおいてこのページを再読み込みしてください。</p>
+          <p>追加したいデバイスにチェックを入れて「追加」ボタンを押してください。</p>
+
+          <form method="post" action="/admin/deviceadd">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>IP アドレス</th>
+                    <th>メーカー</th>
+                    <th>デバイスクラス</th>
+                    <th>Rel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% list.forEach((device) => { %>
+                  <% device.instances.forEach((instance, index) => { %>
+                  <tr>
+                    <td>
+                      <% if(index === 0) { %>
+                      <input type="checkbox" name="id" value="<%= device.id %>">
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if(index === 0) { %>
+                      <%= device.id %>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if(index === 0) { %>
+                      <%= device.address %>
+                      <% } %>
+                    </td>
+                    <td>
+                      <%= instance.manufacturer.name.ja %>
+                      (<%= instance.manufacturer.code %>)
+                    </td>
+                    <td><%= instance.deviceclass.name.ja %> (<%= instance.eoj %>)</td>
+                    <td class="text-center"><%= instance.version %></td>
+                  </tr>
+                  <% }); %>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+            <button type="submit" class="btn btn-secondary">追加</button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+  <%- include('./common_footer') %>
+
+  <script>
+    document.querySelector('form').addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      // チェックされたデバイスの数をチェック
+      const chk_el_list = document.querySelectorAll('input[name="id"]');
+      let num = 0;
+      for (let i = 0; i < chk_el_list.length; i++) {
+        const el = chk_el_list.item(i);
+        if (el.checked === true) {
+          num++;
+        }
+      }
+      if (num === 0) {
+        window.alert('少なくとも一つはチェックを入れてください。');
+        return;
+      }
+
+      // 登録処理
+      $('#modal-loading').modal('show');
+      event.currentTarget.submit();
+    }, false);
+  </script>
+
+</body>
+
+</html>

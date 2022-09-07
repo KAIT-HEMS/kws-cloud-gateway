@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+  <style>
+    #console {
+      height: calc(100vh - 210px);
+      border: 1px solid #eeeeee;
+      background-color: #000000;
+      color: #eeeeee;
+      margin-bottom: 0px;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-0">
+          <h1 class="h2 pb-2 border-bottom">
+            システムログモニター
+          </h1>
+
+          <div class="d-flex mb-2">
+            <div class="mt-2">
+              <label class="d-inline-block mr-3 mb-0">
+                <input type="checkbox" id="auto_scroll" checked>
+                自動スクロールを有効にする
+              </label>
+            </div>
+            <div class="ml-auto">
+              <button type="button" id="clear-btn" class="btn btn-secondary btn-sm">
+                <span data-feather="trash-2"></span>
+                消去
+              </button>
+            </div>
+          </div>
+
+          <pre id="console"></pre>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <%- include('./common_footer') %>
+
+  <script>
+    const EVENT_SOURCE_URL = '/admin/systemlogs/monitor/stream';
+    const MAX_LOG_NUM = 1000;
+    const console_el = document.getElementById('console');
+
+    let log_num = 0;
+    let source = null;
+
+
+    // ページが読み込まれたときの処理
+    document.addEventListener('DOMContentLoaded', () => {
+      // ブラウザーのウィンドウサイズが変更されたときの処理
+      window.addEventListener('resize', () => {
+        setScrollPosition();
+      }, false);
+
+      // コンソールのクリアボタンが押されたときの処理
+      document.getElementById('clear-btn').addEventListener('click', () => {
+        console_el.innerHTML = '';
+      }, false);
+
+      // ブラウザーのタブの表示状態が変わったときの処理
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden === false || document.visibilityState === 'visible') {
+          const cid = parseInt(document.getElementById('controller_id').value, 10);
+          if (cid !== -1) {
+            openEventSource();
+          }
+        }
+      }, false);
+
+      // ページがアンロードされたら EventSource をクローズする
+      window.addEventListener('beforeunload', () => {
+        closeEventSource();
+      }, false);
+
+      openEventSource();
+    }, false);
+
+
+    // EventSource をオープンする
+    function openEventSource() {
+      closeEventSource();
+      console.log('EventSource open');
+      source = new EventSource(EVENT_SOURCE_URL);
+
+      source.onerror = async (event) => {
+        closeEventSource();
+        await wait(1000);
+        openEventSource();
+      };
+
+      source.onmessage = (event) => {
+        const res = JSON.parse(event.data);
+        const txt_node = document.createTextNode(res.message);
+        console_el.appendChild(txt_node);
+        log_num++;
+        if (log_num > MAX_LOG_NUM) {
+          console_el.removeChild(console_el.firstChild);
+          log_num--;
+        }
+        setScrollPosition();
+      };
+    }
+
+    // EventSource をクローズする
+    function closeEventSource() {
+      if (source) {
+        console.log('EventSource close');
+        source.close();
+        source.onerror = null;
+        source.onopen = null;
+        source = null;
+      }
+    }
+
+    // コンソールのスクロール位置を最下部に移動する
+    function setScrollPosition() {
+      if (document.getElementById('auto_scroll').checked) {
+        console_el.scrollTo(0, console_el.scrollHeight);
+      }
+    }
+
+    function wait(msec) {
+      return new Promise((resolve) => {
+        window.setTimeout(() => {
+          resolve();
+        }, msec);
+      });
+    }
+
+  </script>
+</body>
+
+</html>

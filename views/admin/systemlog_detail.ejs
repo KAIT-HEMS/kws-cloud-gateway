@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-3">
+          <h1 class="h2 pb-2 border-bottom">
+            システムログ管理 - <%= fname %>
+          </h1>
+
+          <pre><%= content %></pre>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <%- include('./common_footer') %>
+</body>
+
+</html>

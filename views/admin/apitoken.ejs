@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-3">
+          <h1 class="h2 pb-2 border-bottom">
+            API トークン設定
+          </h1>
+          <div class="pt-3">
+            <p>システム管理者より割り振られた API トークンを入力してください。</p>
+
+            <% if (error.message) { %>
+            <div class="alert alert-danger text-left" role="alert">
+              <%= error.message %>
+            </div>
+            <% } %>
+
+            <form action="/admin/apitoken" method="post" id="frm">
+              <div class="form-group">
+                <label for="current_pass">API トークン</label>
+                <input type="text" id="api_token" name="api_token" value="<%= form.api_token %>"
+                  class="form-control <% if(error.names.api_token) { %>is-invalid<% } %>">
+              </div>
+              <button class="btn btn-secondary" type="submit">登録</button>
+            </form>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const form_el = document.querySelector('form');
+    form_el.addEventListener('submit', (event) => {
+      $('#modal-loading').modal('show');
+    }, false);
+  </script>
+  <%- include('./common_footer') %>
+</body>
+
+</html>

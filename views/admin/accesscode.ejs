@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-3">
+          <h1 class="h2 pb-2 border-bottom">
+            アクセスコード設定
+          </h1>
+          <div class="pt-3">
+            <p>4 桁の数字によってアクセス制限を行います。</p>
+
+            <% if (error.message) { %>
+            <div class="alert alert-danger text-left" role="alert">
+              <%= error.message %>
+            </div>
+            <% } %>
+
+            <form action="/admin/accesscode" method="post" id="frm">
+              <div class="form-group">
+                <label for="current_pass">アクセスコード</label>
+                <input type="text" id="access_code" name="access_code" value="<%= form.access_code %>"
+                  class="form-control <% if(error.names.access_code) { %>is-invalid<% } %>" style="width:6rem;" maxlength="4">
+              </div>
+              <button class="btn btn-secondary" type="submit">登録</button>
+            </form>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const form_el = document.querySelector('form');
+    form_el.addEventListener('submit', (event) => {
+      $('#modal-loading').modal('show');
+    }, false);
+  </script>
+  <%- include('./common_footer') %>
+</body>
+
+</html>

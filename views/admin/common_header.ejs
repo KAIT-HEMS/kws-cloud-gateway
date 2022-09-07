@@ -1,0 +1,51 @@
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/admin/index">
+    クラウド Gateway
+  </a>
+  <ul class="navbar-nav px-3">
+    <li class="nav-item text-nowrap">
+      <button type="button" id="online-state-btn" class="btn btn-sm" data-online="<%= online_state %>"
+        style="width: 6.5em; text-align: left; color:lime;">
+        <span data-feather="power"></span>
+        <span id="online-state">ONLINE</span>
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<script>
+  const online_state_btn_el = document.getElementById('online-state-btn');
+  let online_state = false;
+  if (online_state_btn_el.getAttribute('data-online') === 'true') {
+    online_state = true;
+  }
+
+  showOnlineState(online_state);
+
+  online_state_btn_el.addEventListener('click', async () => {
+    try {
+      const method = online_state ? 'DELETE' : 'PUT';
+      const res = await fetch('/admin/api/onlinestate', { method: method });
+      const data = await res.json();
+      if (data.result === 0) {
+        online_state = !online_state;
+        showOnlineState(online_state);
+      } else {
+        window.alert(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      window.alert(error.message);
+    }
+  }, false);
+
+  function showOnlineState(state) {
+    document.getElementById('online-state').textContent = online_state ? 'ONLINE' : 'OFFLINE';
+    if (online_state) {
+      online_state_btn_el.style.color = 'lime';
+    } else {
+      online_state_btn_el.style.color = '#cccccc';
+    }
+  }
+
+</script>

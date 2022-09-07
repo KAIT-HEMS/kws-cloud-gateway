@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-3">
+          <h1 class="h2 pb-2 border-bottom">
+            デバイス管理
+          </h1>
+
+          <div class="d-flex mt-3 mb-3">
+            <div class="">
+              <a href="/admin/deviceadd"><span data-feather="plus-circle"></span> デバイス追加</a>
+            </div>
+            <div class="ml-auto">
+              <a href="/admin/devicelist?init=1" id="device-list-init-btn"><span data-feather="x-circle"></span>
+                デバイス情報初期化</a>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>IP アドレス</th>
+                  <th>メーカー</th>
+                  <th>デバイスクラス</th>
+                  <th>Rel</th>
+                  <th>Set 権限</th>
+                  <th>削除</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% list.forEach((device) => { %>
+                <% device.instances.forEach((instance, index) => { %>
+                <tr>
+                  <td>
+                    <% if(index === 0) { %>
+                    <%= device.id %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if(index === 0) { %>
+                    <%= device.address %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <%= instance.manufacturer.name.ja %>
+                    (<%= instance.manufacturer.code %>)
+                  </td>
+                  <td><%= instance.deviceclass.name.ja %> (<%= instance.eoj %>)</td>
+                  <td class="text-center"><%= instance.version %></td>
+                  <td class="text-center">
+                    <% if(index === 0) { %>
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input permission-set"
+                        id="permission-set-<%= device.id %>" data-id="<%= device.id %>"
+                        <% if(device.permission.set) {%>checked<% } %>>
+                      <label class="custom-control-label" for="permission-set-<%= device.id %>"></label>
+                    </div>
+                    <% } %>
+                  </td>
+                  <td class="text-center">
+                    <% if(index === 0) { %>
+                    <a href="/admin/devicedelset?id=<%= device.id %>" class="del-link" data-title="<%= device.id %>">
+                      <span data-feather="trash-2" id="<%= device.id %>"></span>
+                    </a>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }); %>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <%- include('./common_footer') %>
+
+  <script>
+    // Set 権限のトグルスイッチの処理
+    const permission_set_list = document.querySelectorAll('input.permission-set');
+    for (let i = 0; i < permission_set_list.length; i++) {
+      const el = permission_set_list.item(i);
+      el.addEventListener('change', permissionSetChanged);
+    }
+
+    async function permissionSetChanged(event) {
+      const el = event.currentTarget;
+      const body = {
+        id: el.getAttribute('data-id'),
+        state: el.checked
+      };
+      try {
+        const res = await fetch('/admin/api/device/permission/set', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.result !== 0) {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        el.checked = !el.checked;
+        window.alert(error.message);
+      }
+    }
+
+    // 削除ボタンの処理
+    const del_link_list = document.querySelectorAll('a.del-link');
+    for (let i = 0; i < del_link_list.length; i++) {
+      const el = del_link_list.item(i);
+      el.addEventListener('click', delLinkClicked);
+    }
+
+    function delLinkClicked(event) {
+      const el = event.currentTarget;
+      const title = el.getAttribute('data-title');
+      const res = window.confirm('本当に「' + title + '」を削除してもよろしいですか？');
+      if (res) {
+        $('#modal-loading').modal('show');
+      } else {
+        event.preventDefault();
+      }
+    }
+
+    // デバイス情報初期化ボタンが押されたときの処理
+    const init_btn = document.getElementById('device-list-init-btn');
+    init_btn.addEventListener('click', (event) => {
+      const res = window.confirm('本当にデバイス情報を初期化 (すべて削除) してもよろしいですか？');
+      if (!res) {
+        event.preventDefault();
+      }
+    }, false);
+
+  </script>
+</body>
+
+</html>

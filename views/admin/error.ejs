@@ -1,0 +1,14 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title><%= system_name %></title>
+  </head>
+  <body>
+	<h1><%= res.code %> <%= res.text %></h1>
+  <p><%= req.method %> <%= req.path %></p>
+	<% if (error.stack) { %>
+	<pre><%= error.stack %></pre>
+	<% } %>
+  </body>
+</html>

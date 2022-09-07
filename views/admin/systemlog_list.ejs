@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <%- include('./common_head') %>
+</head>
+
+<body>
+  <%- include('./common_header') %>
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('./common_nav') %>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="pt-3 pb-2 mb-3">
+          <h1 class="h2 pb-2 border-bottom">
+            システムログ管理
+          </h1>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ログファイル</th>
+                  <th>表示</th>
+                  <th>ダウンロード</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% list.forEach((fname) => { %>
+                <tr>
+                  <td>
+                    <span data-feather="file-text"></span>
+                    <%= fname %>
+                  </td>
+                  <td><a href="/admin/systemlogs/detail/<%= fname %>" class="btn btn-info btn-sm">表示</a></td>
+                  <td><a href="/admin/systemlogs/download/<%= fname %>" download="<%= fname %>" class="btn btn-info btn-sm">ダウンロード</a></td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <%- include('./common_footer') %>
+</body>
+
+</html>
