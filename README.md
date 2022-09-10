@@ -83,11 +83,31 @@ http://localhost:8880/admin/index
 
 「API トークン設定」を開き、管理者より割り当てられたクラウド Gateway の API トークンを設定してください。
 
-![API トークン設定画面](readme-imgs/dashboard_apitoken.png)
+![API トークン設定画面](readme-imgs/dashboard_apitoken_1.png)
 
+API トークン設定画面では、システム管理者より配布された API トークン JSON ファイルを登録します。API トークン JSON の中身は次のようなものです。
+
+```json
+{
+  "name": "KAIT",
+  "org": "神奈川工科大学",
+  "gateway_token": "g6c317p982hedryp_7aajr2n202_6k0dhe7hg_...",
+  "remote_token": "3s882meo10o1f-m59clqo50bhltmy5mx8bosfca..."
+}
+```
+
+API トークン JSON ファイルは、API トークン設定画面で「ファイルを選択」から選択することができます。また、画面にマウスでドロップすることもできます。JSON ファイルの読み込みに成功すると、次のように JSON の内容が画面に表示されます。
+
+![API トークン設定画面2](readme-imgs/dashboard_apitoken_2.png)
+
+このように JSON の読み込みが成功したら、画面下の「登録ボタン」を押します。
 設定が完了すると、ダッシュボードのホーム画面の WebSocket 接続状態は「接続中」になっているはずです。
 
 ![WebSocket 接続中の状態](readme-imgs/dashboard_index_connected.png)
+
+その後、再度、API トークン設定画面を開くと、登録済みの JSON の情報が表示されます。
+
+![API トークン設定画面2](readme-imgs/dashboard_apitoken_3.png)
 
 ## <a id="device">デバイス管理</a>
 

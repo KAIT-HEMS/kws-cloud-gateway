@@ -3,6 +3,16 @@
 
 <head>
   <%- include('./common_head') %>
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    table.table {
+      font-size: 90%;
+    }
+  </style>
 </head>
 
 <body>
@@ -15,8 +25,43 @@
           <h1 class="h2 pb-2 border-bottom">
             API トークン設定
           </h1>
-          <div class="pt-3">
-            <p>システム管理者より割り振られた API トークンを入力してください。</p>
+
+          <% if (api_token_json_data) { %>
+          <p>現在登録されている API トークン情報は次の通りです。</p>
+          <table class="table table-bordered table-sm mb-3">
+            <thead>
+              <tr>
+                <th>キー</th>
+                <th>値</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>名前</td>
+                <td><%= api_token_json_data.name %></td>
+              </tr>
+              <tr>
+                <td>所属</td>
+                <td><%= api_token_json_data.org %></td>
+              </tr>
+              <tr>
+                <td>Gateway用トークン</td>
+                <td><%= api_token_json_data.gateway_token %></td>
+              </tr>
+              <tr>
+                <td>リモート用トークン</td>
+                <td><%= api_token_json_data.remote_token %></td>
+              </tr>
+            </tbody>
+          </table>
+          <% } else { %>
+          <p class="text-danger">API トークンが未設定です。</p>
+          <% } %>
+
+          <div>
+            <p>API トークン情報を登録または更新するには、システム管理者より配布された
+              API トークン JSON ファイルを選択してくささい。
+              この画面に JSON ファイルをドロップすることもできます。</p>
 
             <% if (error.message) { %>
             <div class="alert alert-danger text-left" role="alert">
@@ -26,11 +71,41 @@
 
             <form action="/admin/apitoken" method="post" id="frm">
               <div class="form-group">
-                <label for="current_pass">API トークン</label>
-                <input type="text" id="api_token" name="api_token" value="<%= form.api_token %>"
-                  class="form-control <% if(error.names.api_token) { %>is-invalid<% } %>">
+                <input type="file" id="api_token_json_file" name="api_token_json_file" class="form-control-file">
               </div>
-              <button class="btn btn-secondary" type="submit">登録</button>
+
+              <div id="confirm_box" hidden>
+                <p>選択された JSON ファイルの内容は次の通りです。この情報を登録するなら画面下の「登録」ボタンを押してください。</p>
+                <table class="table table-bordered table-sm">
+                  <thead>
+                    <tr>
+                      <th>キー</th>
+                      <th>値</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>名前</td>
+                      <td id="name"></td>
+                    </tr>
+                    <tr>
+                      <td>所属</td>
+                      <td id="org"></td>
+                    </tr>
+                    <tr>
+                      <td>Gateway用トークン</td>
+                      <td id="gateway_token"></td>
+                    </tr>
+                    <tr>
+                      <td>リモート用トークン</td>
+                      <td id="remote_token"></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <textarea name="api_token_json" id="api_token_json" hidden><%= form.api_token_json %></textarea>
+                <button class="btn btn-secondary" type="submit">登録</button>
+              </div>
             </form>
           </div>
 
@@ -40,6 +115,82 @@
   </div>
 
   <script>
+    // フォームコントロールでファイルが選択されたときの処理
+    document.getElementById('api_token_json_file').addEventListener('change', (event) => {
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+      const file = event.target.files[0];
+      if (file.size === 0) {
+        window.alert('選択されたファイルは空です。');
+        return;
+      }
+      if (file.type !== 'application/json') {
+        window.alert('選択されたファイルは JSON ファイルではありません。');
+        return;
+      }
+
+      readJsonFile(file);
+    }, false);
+
+    // ファイルが body にドロップされたときの処理
+    document.body.addEventListener('dragenter', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+    }, false);
+
+    document.body.addEventListener('dragover', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+    }, false);
+
+    document.body.addEventListener('drop', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const files = event.dataTransfer.files;
+      if (files.length === 0) {
+        return;
+      }
+      const file = files[0];
+      if (file.size === 0) {
+        window.alert('選択されたファイルは空です。');
+        return;
+      }
+      if (file.type !== 'application/json') {
+        window.alert('選択されたファイルは JSON ファイルではありません。');
+        return;
+      }
+
+      readJsonFile(file);
+    }, false)
+
+    function readJsonFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const json = event.target.result;
+        let data = null;
+        try {
+          data = JSON.parse(json);
+        } catch (e) {
+          window.alert('指定のファイルは JSON ファイルではありません。');
+          return;
+        }
+        if (!data.name || !data.gateway_token || !data.remote_token) {
+          window.alert('指定の JSON ファイルに必要な情報が含まれていません。');
+          return;
+        }
+
+        document.getElementById('name').textContent = data.name;
+        document.getElementById('org').textContent = data.org || '';
+        document.getElementById('gateway_token').textContent = data.gateway_token;
+        document.getElementById('remote_token').textContent = data.remote_token;
+        document.getElementById('api_token_json').value = json;
+        document.getElementById('confirm_box').hidden = false;
+      };
+      reader.readAsText(file);
+    }
+
     const form_el = document.querySelector('form');
     form_el.addEventListener('submit', (event) => {
       $('#modal-loading').modal('show');
