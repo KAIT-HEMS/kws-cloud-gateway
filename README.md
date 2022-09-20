@@ -77,7 +77,7 @@ $ npm start
 http://localhost:8880/admin/index
 ```
 
-はじめてアクセスすると、次のように WebSocket 接続状態がエラーになっているはずです。
+はじめてアクセスすると、次のように「API トークンが未設定です。」というメッセージが表示されているはずです。
 
 ![WebSocket 未接続の状態](readme-imgs/dashboard_index_error.png)
 
