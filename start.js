@@ -72,7 +72,7 @@ function showSplash(version, stext) {
   console.log(stext);
   console.log('');
   console.log('ECHONET Lite 実機試験環境整備');
-  console.log('クラウド Gateway v' + version);
+  console.log('クラウド Gateway ' + version);
   console.log('\u001b[0m');
 }
 
